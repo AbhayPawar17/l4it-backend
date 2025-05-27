@@ -1,14 +1,22 @@
-from app.auth.routes import user as user_routes
-from app.blog.routes import blog as blog_routes
+import os
+from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from app.core.database import init_db
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from app.core.database import init_db
+from app.auth.routes import user as user_routes
+from app.blog.routes import blog as blog_routes
+from app.services.routes.mspservices import router as msp_services_routes
 from app.core.logging import LoggingMiddleware
 
+load_dotenv()
+
+APP_HOST = os.environ["APP_HOST"]
+APP_PORT = int(os.environ["APP_PORT"])
+
 @asynccontextmanager
-async def lifespan(app):
+async def lifespan(app: FastAPI):
     init_db()
     yield
 
@@ -16,6 +24,8 @@ app = FastAPI(lifespan=lifespan)
 
 app.include_router(user_routes.router, prefix="/auth", tags=["auth"])
 app.include_router(blog_routes.router, prefix="/blog", tags=["blog"])
+app.include_router(msp_services_routes, prefix="/msp-services", tags=["msp-services"])
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.add_middleware(
@@ -30,4 +40,4 @@ app.add_middleware(LoggingMiddleware)
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True) 
+    uvicorn.run("app.main:app", host=APP_HOST, port=APP_PORT, reload=True)

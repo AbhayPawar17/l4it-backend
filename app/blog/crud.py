@@ -4,7 +4,7 @@ from app.blog.schemas.blog import BlogCreate, BlogUpdate
 from typing import List, Optional
 
 def create_blog(db: Session, blog: BlogCreate) -> Blog:
-    db_blog = Blog(**blog.dict())
+    db_blog = Blog(**blog.model_dump())
     db.add(db_blog)
     db.commit()
     db.refresh(db_blog)
@@ -23,7 +23,7 @@ def update_blog(db: Session, blog_id: int, blog: BlogUpdate) -> Optional[Blog]:
     db_blog = db.query(Blog).filter(Blog.id == blog_id).first()
     if not db_blog:
         return None
-    for key, value in blog.dict(exclude_unset=True).items():
+    for key, value in blog.model_dump(exclude_unset=True).items():
         setattr(db_blog, key, value)
     db.commit()
     db.refresh(db_blog)

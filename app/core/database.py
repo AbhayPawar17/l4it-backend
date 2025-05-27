@@ -2,8 +2,6 @@ import os
 import urllib.parse
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app.auth.models.user import Base as AuthBase
-from app.blog.models.blog import Base as BlogBase
 from dotenv import load_dotenv
 from app.core.base import Base
 

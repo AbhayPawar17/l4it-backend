@@ -100,8 +100,7 @@ ENV/
 .venv/
 
 # dotenv
-.env
-.env.*
+
 
 # Database
 *.sqlite3
