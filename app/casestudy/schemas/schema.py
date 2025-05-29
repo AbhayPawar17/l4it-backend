@@ -1,0 +1,20 @@
+from pydantic import BaseModel, ConfigDict
+from typing import Optional
+
+class CaseStudyBase(BaseModel):
+    image: Optional[str] = None
+    heading: str
+    short_description: str
+    content: str
+    meta_title: Optional[str] = None
+    meta_description: Optional[str] = None
+
+class CaseStudyCreate(CaseStudyBase):
+    pass
+
+class CaseStudyUpdate(CaseStudyBase):
+    pass
+
+class CaseStudyOut(CaseStudyBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True)

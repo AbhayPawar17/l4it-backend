@@ -10,6 +10,7 @@ from app.blog.routes import blog as blog_routes
 from app.services.routes.mspservices import router as msp_services_routes
 from app.whatwedo.routes.info import router as info_routes
 from app.contact.routes.routes import router as contact_router
+from app.casestudy.routes.route import router as case_study_routes
 from app.core.logging import LoggingMiddleware
 
 load_dotenv()
@@ -29,6 +30,7 @@ app.include_router(blog_routes.router, prefix="/blog", tags=["blog"])
 app.include_router(msp_services_routes, prefix="/msp-services", tags=["msp-services"])
 app.include_router(info_routes, prefix="/info", tags=["info"])
 app.include_router(contact_router, prefix="/contact", tags=["contact"])
+app.include_router(case_study_routes, prefix="/case-studies", tags=["case-studies"])
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
