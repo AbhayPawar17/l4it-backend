@@ -24,3 +24,14 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def init_db():
     Base.metadata.create_all(bind=engine) 
+
+def get_db():
+    """
+    Generator function that yields database sessions.
+    Ensures the session is properly closed after use.
+    """
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
