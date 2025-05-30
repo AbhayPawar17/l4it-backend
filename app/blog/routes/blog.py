@@ -79,6 +79,8 @@ def read_blog(blog_id: int, db: Session = Depends(get_db)):
     author_email = user.email if user else None
     blog_dict = blog.__dict__.copy()
     blog_dict["author_email"] = author_email
+    if blog_dict.get("image"):
+            blog_dict["image"] = f"{BASE_URL}{blog_dict['image']}"
     return BlogOut(**blog_dict)
 
 @router.patch("/{blog_id}", response_model=BlogOut)
