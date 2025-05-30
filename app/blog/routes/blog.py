@@ -13,6 +13,8 @@ from app.blog.models.blog import Blog
 
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
 UPLOAD_DIR = "static/uploads"
+BASE_URL = "http://ai.l4it.net:8000"
+
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 router = APIRouter()
@@ -63,6 +65,8 @@ def read_blogs(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
         author_email = user.email if user else None
         blog_dict = blog.__dict__.copy()
         blog_dict["author_email"] = author_email
+        if blog_dict.get("image"):
+            blog_dict["image"] = f"{BASE_URL}{blog_dict['image']}"
         result.append(BlogOut(**blog_dict))
     return result
 
@@ -75,6 +79,8 @@ def read_blog(blog_id: int, db: Session = Depends(get_db)):
     author_email = user.email if user else None
     blog_dict = blog.__dict__.copy()
     blog_dict["author_email"] = author_email
+    if blog_dict.get("image"):
+            blog_dict["image"] = f"{BASE_URL}{blog_dict['image']}"
     return BlogOut(**blog_dict)
 
 @router.patch("/{blog_id}", response_model=BlogOut)
