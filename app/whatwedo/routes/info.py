@@ -31,6 +31,7 @@ def get_db():
 
 @router.post("/", response_model=InfoOut, status_code=status.HTTP_201_CREATED)
 async def create(
+    name: str = Form(...),  # Added name parameter
     content: str = Form(...),
     image: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
@@ -46,6 +47,7 @@ async def create(
         image_path = f"/{file_location.replace(os.sep, '/')}"
 
     info_data = InfoCreate(
+        name=name,  # Added name field
         content=content,
         image=image_path,
         user_id=current_user.id
@@ -66,6 +68,7 @@ def read_info(info_id: int, db: Session = Depends(get_db)):
 @router.patch("/{info_id}", response_model=InfoOut)
 async def update(
     info_id: int,
+    name: str = Form(...),  # Added name parameter
     content: str = Form(...),
     image: Optional[UploadFile] = File(None),
     image_path: Optional[str] = Form(None),
@@ -90,6 +93,7 @@ async def update(
         final_image_path = image_path
 
     updated_data = InfoUpdate(
+        name=name,  # Added name field
         content=content,
         image=final_image_path,
         user_id=current_user.id

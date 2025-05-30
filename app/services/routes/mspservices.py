@@ -31,6 +31,7 @@ def get_db():
 
 @router.post("/", response_model=MSPServiceOut, status_code=status.HTTP_201_CREATED)
 async def create(
+    name: str = Form(...),  # Added name parameter
     content: str = Form(...),
     image: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
@@ -46,6 +47,7 @@ async def create(
         image_path = f"/{file_location.replace(os.sep, '/')}"
 
     service_data = MSPServiceCreate(
+        name=name,  # Added name field
         content=content,
         image=image_path,
         user_id=current_user.id
@@ -66,6 +68,7 @@ def read_service(service_id: int, db: Session = Depends(get_db)):
 @router.patch("/{service_id}", response_model=MSPServiceOut)
 async def update(
     service_id: int,
+    name: str = Form(...),  # Added name parameter
     content: str = Form(...),
     image: Optional[UploadFile] = File(None),
     image_path: Optional[str] = Form(None),
@@ -86,11 +89,11 @@ async def update(
         with open(file_location, "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
         final_image_path = f"/{file_location.replace(os.sep, '/')}"
-
     elif image_path:
         final_image_path = image_path
 
     updated_data = MSPServiceUpdate(
+        name=name,  # Added name field
         content=content,
         image=final_image_path,
         user_id=current_user.id
