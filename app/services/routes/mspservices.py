@@ -18,6 +18,7 @@ import os
 import shutil
 
 router = APIRouter()
+BASE_URL = "http://ai.l4it.net:8000"
 UPLOAD_DIR = "static/uploads"
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -54,16 +55,32 @@ async def create(
     )
     return create_service(db, service_data)
 
+# services router file
+
 @router.get("/", response_model=List[MSPServiceOut])
 def read_services(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return get_services(db, skip, limit)
+    services = get_services(db, skip, limit)
+    result = []
+    for service in services:
+        user = db.query(User).filter(User.id == service.user_id).first()
+        author_email = user.email if user else None
+        service_dict = service.__dict__.copy()
+        service_dict["author_email"] = author_email
+        if service_dict.get("image"):
+            service_dict["image"] = f"{BASE_URL}{service_dict['image']}"
+        result.append(MSPServiceOut(**service_dict))
+    return result
 
 @router.get("/{service_id}", response_model=MSPServiceOut)
 def read_service(service_id: int, db: Session = Depends(get_db)):
     service = get_service(db, service_id)
     if not service:
         raise HTTPException(status_code=404, detail="Service not found")
-    return service
+    user = db.query(User).filter(User.id == service.user_id).first()
+    author_email = user.email if user else None
+    service_dict = service.__dict__.copy()
+    service_dict["author_email"] = author_email
+    return MSPServiceOut(**service_dict)
 
 @router.patch("/{service_id}", response_model=MSPServiceOut)
 async def update(
