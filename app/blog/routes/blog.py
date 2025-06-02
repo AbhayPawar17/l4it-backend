@@ -86,7 +86,7 @@ def read_blogs(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
         result.append(BlogOut(**blog_dict))
     return result
 
-@router.get("/{blog_id}", response_model=BlogOut)
+@router.get("/id/{blog_id}", response_model=BlogOut)
 def read_blog(blog_id: int, db: Session = Depends(get_db)):
     blog = get_blog(db, blog_id)
     if not blog:
@@ -112,7 +112,7 @@ def read_blog_by_type(type: str, db: Session = Depends(get_db)):
         blog_dict["image"] = f"{BASE_URL}{blog_dict['image']}"
     return BlogOut(**blog_dict)
 
-@router.get("/slug/{slug}", response_model=BlogOut)
+@router.get("/{slug}", response_model=BlogOut)
 def read_blog_by_slug(slug: str, db: Session = Depends(get_db)):
     blog = db.query(Blog).filter(Blog.slug == slug).first()
     if not blog:
