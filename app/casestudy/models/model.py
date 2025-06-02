@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy import Column, Integer, String, Text, DateTime, func
 from app.core.base import Base
 
 class CaseStudy(Base):
@@ -10,3 +10,6 @@ class CaseStudy(Base):
     content = Column(Text, nullable=False)
     meta_title = Column(String(255), nullable=True)
     meta_description = Column(String(512), nullable=True)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)

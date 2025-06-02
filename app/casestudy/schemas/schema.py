@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from typing import Optional
+from datetime import datetime
 
 class CaseStudyBase(BaseModel):
     image: Optional[str] = None
@@ -17,4 +18,7 @@ class CaseStudyUpdate(CaseStudyBase):
 
 class CaseStudyOut(CaseStudyBase):
     id: int
+    created_at: datetime
+    updated_at: datetime
+
     model_config = ConfigDict(from_attributes=True)

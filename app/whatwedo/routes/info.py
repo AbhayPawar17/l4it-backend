@@ -18,6 +18,7 @@ import os
 import shutil
 
 router = APIRouter()
+BASE_URL = "http://ai.l4it.net:8000"
 UPLOAD_DIR = "static/uploads"
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -31,6 +32,7 @@ def get_db():
 
 @router.post("/", response_model=InfoOut, status_code=status.HTTP_201_CREATED)
 async def create(
+    name: str = Form(...),  # Added name parameter
     content: str = Form(...),
     image: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
@@ -46,6 +48,7 @@ async def create(
         image_path = f"/{file_location.replace(os.sep, '/')}"
 
     info_data = InfoCreate(
+        name=name,  # Added name field
         content=content,
         image=image_path,
         user_id=current_user.id
@@ -54,18 +57,41 @@ async def create(
 
 @router.get("/", response_model=List[InfoOut])
 def read_infos(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return get_infos(db, skip, limit)
+    infos = get_infos(db, skip, limit)
+    result = []
+    for info in infos:
+        user = db.query(User).filter(User.id == info.user_id).first()
+        author_email = user.email if user else None
+        info_dict = info.__dict__.copy()
+        info_dict["author_email"] = author_email
+
+        if info_dict.get("image"):
+            info_dict["image"] = f"{BASE_URL}{info_dict['image']}"
+        
+        result.append(InfoOut(**info_dict))
+    return result
 
 @router.get("/{info_id}", response_model=InfoOut)
 def read_info(info_id: int, db: Session = Depends(get_db)):
     info = get_info(db, info_id)
     if not info:
         raise HTTPException(status_code=404, detail="Info not found")
-    return info
+    
+    user = db.query(User).filter(User.id == info.user_id).first()
+    author_email = user.email if user else None
+    info_dict = info.__dict__.copy()
+    info_dict["author_email"] = author_email
+
+    # Format image URL
+    if info_dict.get("image"):
+        info_dict["image"] = f"{BASE_URL}{info_dict['image']}"
+    
+    return InfoOut(**info_dict)
 
 @router.patch("/{info_id}", response_model=InfoOut)
 async def update(
     info_id: int,
+    name: str = Form(...),  # Added name parameter
     content: str = Form(...),
     image: Optional[UploadFile] = File(None),
     image_path: Optional[str] = Form(None),
@@ -90,6 +116,7 @@ async def update(
         final_image_path = image_path
 
     updated_data = InfoUpdate(
+        name=name,  # Added name field
         content=content,
         image=final_image_path,
         user_id=current_user.id
