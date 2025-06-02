@@ -5,8 +5,8 @@ from typing import Optional
 class BlogBase(BaseModel):
     image: Optional[str] = None
     heading: str
-    type: str
-    slug: str
+    type: Optional[str] = None
+    slug: Optional[str] = None
     short_description: str
     content: str
     meta_title: Optional[str] = None

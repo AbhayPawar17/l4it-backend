@@ -40,7 +40,7 @@ async def create(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    if slug:
+    if slug and slug.strip() != "":
         base_slug = slug.lower().replace(" ", "-")
     else:
         base_slug = slugify(heading)
@@ -125,7 +125,7 @@ def read_blog_by_slug(slug: str, db: Session = Depends(get_db)):
         blog_dict["image"] = f"{BASE_URL}{blog_dict['image']}"
     return BlogOut(**blog_dict)
 
-@router.patch("/{blog_id}", response_model=BlogOut)
+@router.post("/update/{blog_id}", response_model=BlogOut)
 async def update(
     blog_id: int,
     heading: str = Form(...),
@@ -135,11 +135,12 @@ async def update(
     meta_description: Optional[str] = Form(None),
     image: Optional[UploadFile] = File(None),
     image_path: Optional[str] = Form(None),  # Add this to preserve existing image
-    type: str = Form(...),
+    type: Optional[str] = Form(None),
+    slug: Optional[str] = Form(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    if slug:
+    if slug and slug.strip() != "":
         base_slug = slug.lower().replace(" ", "-")
     else:
         base_slug = slugify(heading)
@@ -184,7 +185,7 @@ async def update(
     updated = update_blog(db, blog_id, blog_data)
     return updated
 
-@router.delete("/{blog_id}", status_code=status.HTTP_200_OK)
+@router.post("/delete/{blog_id}", status_code=status.HTTP_200_OK)
 def delete(blog_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     blog = get_blog(db, blog_id)
     if not blog:
