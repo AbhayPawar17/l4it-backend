@@ -10,11 +10,12 @@ from app.auth.dependencies import get_current_user
 from app.auth.models.user import User
 from fastapi.responses import JSONResponse
 from app.blog.models.blog import Blog
+from slugify import slugify 
+import uuid
 
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
 UPLOAD_DIR = "static/uploads"
 BASE_URL = "http://ai.l4it.net:8000"
-
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 router = APIRouter()
@@ -34,9 +35,21 @@ async def create(
     meta_title: Optional[str] = Form(None),
     meta_description: Optional[str] = Form(None),
     image: Optional[UploadFile] = File(None),
+    type: str = Form(...),
+    slug: Optional[str] = Form(None),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
+    if slug:
+        base_slug = slug.lower().replace(" ", "-")
+    else:
+        base_slug = slugify(heading)
+    
+    
+    slug = base_slug
+    while db.query(Blog).filter(Blog.slug == slug).first():
+        slug = f"{base_slug}-{uuid.uuid4().hex[:6]}"
+
     image_path = None
     if image:
         if image.content_type not in ALLOWED_IMAGE_TYPES:
@@ -45,6 +58,7 @@ async def create(
         with open(file_location, "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
         image_path = f"/{file_location.replace(os.sep, '/')}"
+
     blog_data = BlogCreate(
         heading=heading,
         short_description=short_description,
@@ -52,7 +66,9 @@ async def create(
         meta_title=meta_title,
         meta_description=meta_description,
         image=image_path,
-        user_id=current_user.id
+        user_id=current_user.id,
+        type=type,
+        slug=slug,
     )
     return create_blog(db, blog_data)
 
@@ -83,6 +99,32 @@ def read_blog(blog_id: int, db: Session = Depends(get_db)):
             blog_dict["image"] = f"{BASE_URL}{blog_dict['image']}"
     return BlogOut(**blog_dict)
 
+@router.get("/type/{type}", response_model=BlogOut)
+def read_blog_by_type(type: str, db: Session = Depends(get_db)):
+    blog = db.query(Blog).filter(Blog.type == type).first()
+    if not blog:
+        raise HTTPException(status_code=404, detail="Blog not found")
+    user = db.query(User).filter(User.id == blog.user_id).first()
+    author_email = user.email if user else None
+    blog_dict = blog.__dict__.copy()
+    blog_dict["author_email"] = author_email
+    if blog_dict.get("image"):
+        blog_dict["image"] = f"{BASE_URL}{blog_dict['image']}"
+    return BlogOut(**blog_dict)
+
+@router.get("/slug/{slug}", response_model=BlogOut)
+def read_blog_by_slug(slug: str, db: Session = Depends(get_db)):
+    blog = db.query(Blog).filter(Blog.slug == slug).first()
+    if not blog:
+        raise HTTPException(status_code=404, detail="Blog not found")
+    user = db.query(User).filter(User.id == blog.user_id).first()
+    author_email = user.email if user else None
+    blog_dict = blog.__dict__.copy()
+    blog_dict["author_email"] = author_email
+    if blog_dict.get("image"):
+        blog_dict["image"] = f"{BASE_URL}{blog_dict['image']}"
+    return BlogOut(**blog_dict)
+
 @router.patch("/{blog_id}", response_model=BlogOut)
 async def update(
     blog_id: int,
@@ -93,9 +135,18 @@ async def update(
     meta_description: Optional[str] = Form(None),
     image: Optional[UploadFile] = File(None),
     image_path: Optional[str] = Form(None),  # Add this to preserve existing image
+    type: str = Form(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    if slug:
+        base_slug = slug.lower().replace(" ", "-")
+    else:
+        base_slug = slugify(heading)
+    slug = base_slug
+    while db.query(Blog).filter(Blog.slug == slug).first():
+        slug = f"{base_slug}-{uuid.uuid4().hex[:6]}"
+
     blog = get_blog(db, blog_id)
     if not blog:
         raise HTTPException(status_code=404, detail="Blog not found")
@@ -126,7 +177,9 @@ async def update(
         meta_title=meta_title,
         meta_description=meta_description,
         image=final_image_path,  # Use the determined image path
-        user_id=current_user.id
+        user_id=current_user.id,
+        type=type,             
+        slug=slug 
     )
     updated = update_blog(db, blog_id, blog_data)
     return updated
