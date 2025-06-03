@@ -99,18 +99,23 @@ def read_blog(blog_id: int, db: Session = Depends(get_db)):
             blog_dict["image"] = f"{BASE_URL}{blog_dict['image']}"
     return BlogOut(**blog_dict)
 
-@router.get("/type/{type}", response_model=BlogOut)
+@router.get("/type/{type}", response_model=List[BlogOut])
 def read_blog_by_type(type: str, db: Session = Depends(get_db)):
-    blog = db.query(Blog).filter(Blog.type == type).first()
-    if not blog:
+    blogs = db.query(Blog).filter(Blog.type == type).all()
+    result = []
+    if not blogs:
         raise HTTPException(status_code=404, detail="Blog not found")
-    user = db.query(User).filter(User.id == blog.user_id).first()
-    author_email = user.email if user else None
-    blog_dict = blog.__dict__.copy()
-    blog_dict["author_email"] = author_email
-    if blog_dict.get("image"):
-        blog_dict["image"] = f"{BASE_URL}{blog_dict['image']}"
-    return BlogOut(**blog_dict)
+    else:
+        for blog in blogs:
+            user = db.query(User).filter(User.id == blog.user_id).first()
+            author_email = user.email if user else None
+            blog_dict = blog.__dict__.copy()
+            blog_dict["author_email"] = author_email
+            if blog_dict.get("image"):
+                blog_dict["image"] = f"{BASE_URL}{blog_dict['image']}"
+            result.append(BlogOut(**blog_dict))
+        return result
+
 
 @router.get("/{slug}", response_model=BlogOut)
 def read_blog_by_slug(slug: str, db: Session = Depends(get_db)):
