@@ -25,6 +25,17 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+origins = [
+    "http://ai.l4it.net",
+    "https://ai.l4it.net",
+    "http://ai.l4it.net:4000",
+    "https://ai.l4it.net:4000",
+    "http://ai.l4it.net:8000",
+    "https://ai.l4it.net:8000",
+    "http://localhost:4000",
+    "http://localhost:8000",
+]
+
 app.include_router(user_routes.router, prefix="/auth", tags=["auth"])
 app.include_router(blog_routes.router, prefix="/blog", tags=["blog"])
 app.include_router(msp_services_routes, prefix="/msp-services", tags=["msp-services"])
@@ -36,7 +47,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  
+    allow_origins=origins,  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

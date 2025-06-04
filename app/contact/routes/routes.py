@@ -10,8 +10,7 @@ router = APIRouter()
 @router.post("/submit", response_model=schema.ContactSubmissionOut)
 async def submit_contact_form(
     submission: schema.ContactSubmissionCreate,
-    db: Session = Depends(get_db),
-    _ = Depends(get_current_user)  # Validates the Bearer token
+    db: Session = Depends(get_db)
 ):
     """Submit a new contact form"""
     return create_contact_submission(db, submission)
