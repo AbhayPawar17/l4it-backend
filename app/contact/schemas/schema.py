@@ -12,6 +12,7 @@ class ContactSubmissionCreate(BaseModel):
     referral_source: Optional[str] = None
     message: str
     services_needed: str
+    how_did_u_hear_us:Optional[str] = None
 
 class ContactSubmissionOut(ContactSubmissionCreate):
     id: int

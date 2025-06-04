@@ -16,3 +16,4 @@ class ContactSubmission(Base):
     message = Column(Text, nullable=False)
     services_needed = Column(String(200), nullable=False)
     submission_date = Column(DateTime, default=datetime.utcnow)
+    how_did_u_hear_us = Column(String(200), nullable=True)
