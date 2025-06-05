@@ -32,6 +32,8 @@ origins = [
     "https://ai.l4it.net:4000",
     "http://ai.l4it.net:8000",
     "https://ai.l4it.net:8000",
+    "http://ai.l4it.net:5000",
+    "https://ai.l4it.net:5000",
     "http://localhost:4000",
     "http://localhost:8000",
 ]
