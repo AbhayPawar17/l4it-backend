@@ -28,6 +28,7 @@ app = FastAPI(lifespan=lifespan)
 origins = [
     "http://ai.l4it.net",
     "https://ai.l4it.net",
+    "https://ai.l4it.net/",
     "http://ai.l4it.net:4000",
     "https://ai.l4it.net:4000",
     "http://ai.l4it.net:8000",
