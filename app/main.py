@@ -23,8 +23,8 @@ async def lifespan(app: FastAPI):
     init_db()
     yield
 
-# app = FastAPI(lifespan=lifespan)
-app = FastAPI(lifespan=lifespan, root_path="/api")
+app = FastAPI(lifespan=lifespan)
+# app = FastAPI(lifespan=lifespan, root_path="/api")
 
 origins = [
     "http://ai.l4it.net",
