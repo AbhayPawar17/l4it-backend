@@ -15,7 +15,7 @@ import uuid
 
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
 UPLOAD_DIR = "static/uploads"
-BASE_URL = "https://l4it.net/api/"
+BASE_URL = "https://l4it.net/api"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 router = APIRouter()
