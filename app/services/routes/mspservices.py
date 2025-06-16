@@ -18,7 +18,7 @@ import os
 import shutil
 
 router = APIRouter()
-BASE_URL = "https://ai.l4it.net/api/"
+BASE_URL = "https://l4it.net/api/"
 UPLOAD_DIR = "static/uploads"
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
 os.makedirs(UPLOAD_DIR, exist_ok=True)
