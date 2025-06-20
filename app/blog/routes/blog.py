@@ -37,6 +37,7 @@ async def create(
     image: Optional[UploadFile] = File(None),
     type: str = Form(...),
     slug: Optional[str] = Form(None),
+    blog_data_raw: Optional[str] = Form(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -69,6 +70,7 @@ async def create(
         user_id=current_user.id,
         type=type,
         slug=slug,
+        blog_data_raw=blog_data_raw,
     )
     return create_blog(db, blog_data)
 
