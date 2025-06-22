@@ -145,7 +145,9 @@ async def update(
     type: Optional[str] = Form(None),
     slug: Optional[str] = Form(None),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    blog_data_raw: Optional[str] = Form(None)
+
 ):
     if slug and slug.strip() != "":
         base_slug = slug.lower().replace(" ", "-")
