@@ -189,7 +189,9 @@ async def update(
         image=final_image_path,  # Use the determined image path
         user_id=current_user.id,
         type=type,             
-        slug=slug 
+        slug=slug,
+        blog_data_raw=blog_data_raw
+        
     )
     updated = update_blog(db, blog_id, blog_data)
     return updated
