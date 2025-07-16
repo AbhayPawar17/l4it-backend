@@ -7,6 +7,7 @@ class Blog(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     image = Column(String(255), nullable=True)
+    thumbnail = Column(String(255), nullable=True)
     heading = Column(String(255), nullable=False)
     short_description = Column(String(512), nullable=False)
     content = Column(Text, nullable=False)

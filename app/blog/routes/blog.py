@@ -35,6 +35,7 @@ async def create(
     meta_title: Optional[str] = Form(None),
     meta_description: Optional[str] = Form(None),
     image: Optional[UploadFile] = File(None),
+    thumbnail: Optional[UploadFile] = File(None),
     type: str = Form(...),
     slug: Optional[str] = Form(None),
     blog_data_raw: Optional[str] = Form(None),
@@ -60,6 +61,16 @@ async def create(
             shutil.copyfileobj(image.file, buffer)
         image_path = f"/{file_location.replace(os.sep, '/')}"
 
+    thumbnail_path = None
+    if thumbnail:
+        if thumbnail.content_type not in ALLOWED_IMAGE_TYPES:
+            raise HTTPException(status_code=400, detail="Invalid image format. Allowed: jpg, png, gif, webp")
+        thumbnail_filename = f"thumb_{thumbnail.filename}"
+        file_location = os.path.join(UPLOAD_DIR,thumbnail_filename)
+        with open(file_location, "wb") as buffer:
+            shutil.copyfileobj(thumbnail.file, buffer)
+        thumbnail_path = f"/{file_location.replace(os.sep, '/')}"
+
     blog_data = BlogCreate(
         heading=heading,
         short_description=short_description,
@@ -67,6 +78,7 @@ async def create(
         meta_title=meta_title,
         meta_description=meta_description,
         image=image_path,
+        thumbnail=thumbnail_path,
         user_id=current_user.id,
         type=type,
         slug=slug,
@@ -143,6 +155,8 @@ async def update(
     image: Optional[UploadFile] = File(None),
     image_path: Optional[str] = Form(None),  # Add this to preserve existing image
     type: Optional[str] = Form(None),
+    thumbnail: Optional[UploadFile] = File(None),
+    thumbnail_path: Optional[str] = Form(None), # same as img
     slug: Optional[str] = Form(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -179,6 +193,23 @@ async def update(
     else:
         # Keep the existing image from database
         final_image_path = blog.image
+
+    final_thumbnail_path = None
+    if thumbnail:
+        # New thumbnail uploaded
+        if thumbnail.content_type not in ALLOWED_IMAGE_TYPES:
+            raise HTTPException(status_code=400, detail="Invalid image format. Allowed: jpg, png, gif, webp")
+        thumbnail_filename = f"thumb_{thumbnail.filename}"
+        file_location = os.path.join(UPLOAD_DIR,thumbnail_filename)
+        with open(file_location, "wb") as buffer:
+            shutil.copyfileobj(thumbnail.file, buffer)
+        final_thumbnail_path = f"/{file_location.replace(os.sep, '/')}"
+    elif thumbnail_path:
+        # Preserve existing thumbnail path sent from frontend
+        final_thumbnail_path = thumbnail_path
+    else:
+        # Keep the existing thumbnail from database
+        final_thumbnail_path = blog.thumbnail
     
     blog_data = BlogUpdate(
         heading=heading,
@@ -187,6 +218,7 @@ async def update(
         meta_title=meta_title,
         meta_description=meta_description,
         image=final_image_path,  # Use the determined image path
+        thumbnail=final_thumbnail_path, 
         user_id=current_user.id,
         type=type,             
         slug=slug,
