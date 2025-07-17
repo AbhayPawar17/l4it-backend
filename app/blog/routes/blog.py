@@ -97,6 +97,8 @@ def read_blogs(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
         blog_dict["author_email"] = author_email
         if blog_dict.get("image"):
             blog_dict["image"] = f"{BASE_URL}{blog_dict['image']}"
+        if blog_dict.get("thumbnail"):
+            blog_dict["thumbnail"] = f"{BASE_URL}{blog_dict['thumbnail']}"
         result.append(BlogOut(**blog_dict))
     return result
 
@@ -111,6 +113,8 @@ def read_blog(blog_id: int, db: Session = Depends(get_db)):
     blog_dict["author_email"] = author_email
     if blog_dict.get("image"):
             blog_dict["image"] = f"{BASE_URL}{blog_dict['image']}"
+    if blog_dict.get("thumbnail"):
+        blog_dict["thumbnail"] = f"{BASE_URL}{blog_dict['thumbnail']}"
     return BlogOut(**blog_dict)
 
 @router.get("/type/{type}", response_model=List[BlogOut])
@@ -127,6 +131,8 @@ def read_blog_by_type(type: str, db: Session = Depends(get_db)):
             blog_dict["author_email"] = author_email
             if blog_dict.get("image"):
                 blog_dict["image"] = f"{BASE_URL}{blog_dict['image']}"
+            if blog_dict.get("thumbnail"):
+                blog_dict["thumbnail"] = f"{BASE_URL}{blog_dict['thumbnail']}"
             result.append(BlogOut(**blog_dict))
         return result
 
@@ -142,6 +148,8 @@ def read_blog_by_slug(slug: str, db: Session = Depends(get_db)):
     blog_dict["author_email"] = author_email
     if blog_dict.get("image"):
         blog_dict["image"] = f"{BASE_URL}{blog_dict['image']}"
+    if blog_dict.get("thumbnail"):
+        blog_dict["thumbnail"] = f"{BASE_URL}{blog_dict['thumbnail']}"
     return BlogOut(**blog_dict)
 
 @router.post("/update/{blog_id}", response_model=BlogOut)
