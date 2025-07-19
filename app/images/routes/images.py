@@ -10,6 +10,7 @@ from app.auth.dependencies import get_current_user
 from app.auth.models.user import User
 from fastapi.responses import JSONResponse
 from app.images.model.images import Image
+from datetime import datetime
 
 
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
@@ -38,7 +39,12 @@ async def create(
     if image:
         if image.content_type not in ALLOWED_IMAGE_TYPES:
             raise HTTPException(status_code=400, detail="Invalid image format. Allowed: jpg, png, gif, webp")
-        file_location = os.path.join(UPLOAD_DIR, image.filename)
+        
+        original_name = image.filename
+        _, ext = os.path.splitext(original_name)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        new_filename = f"{current_user.id}_{timestamp}{ext}"
+        file_location = os.path.join(UPLOAD_DIR, new_filename)
         with open(file_location, "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
         image_path = f"/{file_location.replace(os.sep, '/')}"
@@ -47,6 +53,7 @@ async def create(
     image_data = ImageCreate(
         image=image_path,
         user_id=current_user.id,
+        imagename=original_name
     )
     return create_img(db, image_data)
  

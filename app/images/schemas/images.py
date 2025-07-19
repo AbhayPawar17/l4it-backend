@@ -4,6 +4,7 @@ from typing import Optional
 
 class ImageBase(BaseModel):
     image: Optional[str] = None
+    imagename:Optional[str] = None
     
 class ImageCreate(ImageBase):
     user_id: int
