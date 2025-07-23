@@ -171,15 +171,19 @@ async def update(
     blog_data_raw: Optional[str] = Form(None)
 
 ):
+    
+    blog = get_blog(db, blog_id)
+
     if slug and slug.strip() != "":
         base_slug = slug.lower().replace(" ", "-")
-    else:
-        base_slug = slugify(heading)
-    slug = base_slug
-    while db.query(Blog).filter(Blog.slug == slug).first():
-        slug = f"{base_slug}-{uuid.uuid4().hex[:6]}"
 
-    blog = get_blog(db, blog_id)
+        while db.query(Blog).filter(Blog.slug == base_slug , Blog.id != blog_id).first():
+            base_slug = f"{base_slug}-{uuid.uuid4().hex[:6]}"
+        
+        slug=base_slug
+    else:
+        slug=blog.slug
+
     if not blog:
         raise HTTPException(status_code=404, detail="Blog not found")
     if blog.user_id != current_user.id:
